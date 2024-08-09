@@ -10,6 +10,7 @@ def init_state():
     st.session_state['resume_text'] = ""
     st.session_state.initialized = True
     st.session_state.llm_response = None
+    st.session_state.question = None
 
 def read_pdf(pdf_path):
     reader = PdfReader(pdf_path)
@@ -28,10 +29,14 @@ def upload_callback():
 
 def submit_callback():
     document = st.session_state.resume_text
+    question = st.session_state.question
+    if not question:
+        question = "Given a resume below, ask 10 questions that a HR would most likely to ask."
+
     messages = [
         {
             "role": "user",
-            "content": f"Given a resume below, ask 10 questions that a HR would most likely to ask. \n\n -- \n\n {document}",
+            "content": f"{question} \n\n -- \n\n {document}",
         }
     ]
 
@@ -84,8 +89,9 @@ def page_main():
 
         question = st.text_area(
             "Now ask a question about the document!",
-            placeholder="Given this resume, ask 10 questions that a HR would most likely to ask.",
+            #placeholder="Given this resume, ask 10 questions that a HR would most likely to ask.",
             disabled=not st.session_state.resume_text,
+            key='question'
         )
 
         btn_submit = st.button("Submit", on_click=submit_callback, help="Submit the question")
